@@ -10,8 +10,8 @@ import train
 if __name__ == "__main__":
     # data_path = "/data/enso_round1_train_20210201"
     # test_data_path = "/data/enso_round1_test_20210201/"
-    data_path = "data/enso_round1_train_20210201"
-    test_data_path = "data/test/"
+    data_path = "tcdata/enso_round1_train_20210201/"
+    test_data_path = "tcdata/enso_round1_test_20210201/"
     model_path = ""
     out_path = "result/"
     train_loader, test_loader = data.read_data(data_path)

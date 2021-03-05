@@ -290,7 +290,7 @@ dmypy.json
 cython_debug/
 
 ._.DS_Store
-data/*
+tcdata/*
 .vscode/
 .vscode/*
 .VSCodeCounter/

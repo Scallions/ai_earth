@@ -36,7 +36,6 @@ def predict(model=None, test_data_dir=None, out_path=None):
         dataset = data.read_test_data_nolabel(file)
         y = model(dataset).reshape(24).detach().numpy()
         np.save(out_path+file.split("/")[-1], y)
-        break
 
 def score(y, y_hat):
     """calc score

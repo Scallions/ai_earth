@@ -59,7 +59,7 @@ def read_data(only_sst=True, in_range=True):
     """
     read train data nc => torch.array
     """
-    data = netCDF4.Dataset("data/enso_round1_train_20210201/SODA_train.nc", "r")
+    data = netCDF4.Dataset("tcdata/enso_round1_train_20210201/SODA_train.nc", "r")
     sst = np.array(data.variables['sst'][:])
     t300 = np.array(data.variables['t300'][:])
     ua = np.array(data.variables['ua'][:])
@@ -76,7 +76,7 @@ def read_data(only_sst=True, in_range=True):
         va[:,:12,10:13,38:49].reshape(-1,1,3,11)],
         axis=1)
     
-    label = netCDF4.Dataset("data/enso_round1_train_20210201/SODA_label.nc", "r")
+    label = netCDF4.Dataset("tcdata/enso_round1_train_20210201/SODA_label.nc", "r")
     label = np.array(label.variables['nino'][:])
     # label = label.reshape(-1,1)
     label = np.concatenate([label[:,:12].reshape(-1)[12:], label[-1,12:].reshape(-1)], axis=0)
@@ -90,8 +90,8 @@ def read_test_data():
     """
     read test data npy => torch.array
     """
-    data = np.load("data/test/test_0144-01-12.npy").mean(1).mean(1)
-    label = np.load("data/test/label/test_0144-01-12.npy")
+    data = np.load("tcdata/enso_round1_train_20210201/test_0144-01-12.npy").mean(1).mean(1)
+    label = np.load("tcdata/enso_round1_train_20210201/label/test_0144-01-12.npy")
     return torch.from_numpy(np.expand_dims(data,0)).float(), torch.from_numpy(np.expand_dims(label,0)).float()
 
 def read_test_data_nolabel(path):
