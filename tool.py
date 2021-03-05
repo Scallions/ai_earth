@@ -32,7 +32,7 @@ def predict(model=None, dataset=None, out_path=None):
 
 def score(y, y_hat):
     """calc score
-    y: n x 24
+    y: n x 24 np.array
     """
     a = np.zeros((1,24))
     a[0, :4] = 1.5
@@ -53,6 +53,8 @@ def rmse(y, y_hat):
 def cor(y, y_hat):
     """calc cor index
     """
+    if y.shape[0] == 1:
+        return 0
     y_mean = y.mean(0)
     y_hat_mean = y_hat.mean(0)
     d_y = y - y_mean 
@@ -61,3 +63,23 @@ def cor(y, y_hat):
     cor_down = np.sqrt((d_y**2).sum(0) * (d_y_hat**2).sum(0))
     return cor_up / cor_down
     
+def trend_of_ts(ts):
+    """
+    decompose ts to period signal and noise
+    """
+    length = len(ts)
+    x = np.array(list(range(length))).reshape((length,1))
+    sinx = np.sin(x*np.pi*2/12)
+    cosx = np.cos(x*np.pi*2/12)
+    sin2x = np.sin(2*x*np.pi*2/12)
+    cos2x = np.cos(2*x*np.pi*2/12)
+#     sin3x = np.sin(3*x*np.pi*2/12)
+#     cos3x = np.cos(3*x*np.pi*2/12)
+    ones = np.ones((length,1))
+#     data = np.hstack((ones, x, sinx, cosx))
+    data = np.hstack((ones, x, sinx, cosx, sin2x, cos2x))
+#     data = np.hstack((ones, x, sinx, cosx, sin2x, cos2x, sin3x, cos3x))
+    b = np.dot(np.dot(np.linalg.inv(np.dot(data.transpose(), data)), data.transpose()), ts)
+    ts_hat = np.dot(data, b)
+    noise = ts - ts_hat 
+    return ts_hat, noise
