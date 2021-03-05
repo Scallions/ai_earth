@@ -1,9 +1,11 @@
 """
 some tool funcs
 """
+import data
 
 import numpy as np
-
+import glob
+import os
 
 def save_model():
     """
@@ -24,11 +26,16 @@ def lose_func():
     """
     pass 
 
-def predict(model=None, dataset=None, out_path=None):
+def predict(model=None, test_data_dir=None, out_path=None):
     """
     predict and save result
     """
-    pass
+    for file in glob.iglob(os.path.join(test_data_dir, r"*.npy")):
+        print(file)
+        dataset = data.read_test_data_nolabel(file)
+        y = model(dataset).reshape(24).detach().numpy()
+        np.save(out_path+file.split("/")[-1], y)
+        break
 
 def score(y, y_hat):
     """calc score

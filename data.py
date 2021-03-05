@@ -94,6 +94,10 @@ def read_test_data():
     label = np.load("data/test/label/test_0144-01-12.npy")
     return torch.from_numpy(np.expand_dims(data,0)).float(), torch.from_numpy(np.expand_dims(label,0)).float()
 
+def read_test_data_nolabel(path):
+    data = np.load(path).mean(1).mean(1)
+    return torch.from_numpy(np.expand_dims(data,0)).float()
+
 def data_in_range():
     """
     data in range
