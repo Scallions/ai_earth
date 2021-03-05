@@ -290,6 +290,7 @@ dmypy.json
 cython_debug/
 
 ._.DS_Store
+.DS_Store
 tcdata/*
 .vscode/
 .vscode/*
