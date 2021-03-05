@@ -13,8 +13,9 @@ if __name__ == "__main__":
     data_path = "data/enso_round1_train_20210201"
     test_data_path = "data/test/"
     model_path = ""
-    out_path = "out/"
+    out_path = "result/"
     train_loader, test_loader = data.read_data(data_path)
     model = models.build_model()
     train.train(model, train_loader, test_loader)
-    tool.predict(model, test_data_path, out_path)
+    tool.predict(model, test_data_path, out_path) 
+    tool.make_zip()

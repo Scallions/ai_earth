@@ -6,6 +6,7 @@ import data
 import numpy as np
 import glob
 import os
+import zipfile
 
 def save_model():
     """
@@ -90,3 +91,18 @@ def trend_of_ts(ts):
     ts_hat = np.dot(data, b)
     noise = ts - ts_hat 
     return ts_hat, noise
+
+def make_zip(source_dir='./result/', output_filename = 'result.zip'):
+    zipf = zipfile.ZipFile(output_filename, 'w')
+    pre_len = len(os.path.dirname(source_dir))
+    source_dirs = os.walk(source_dir)
+    print(source_dirs)
+    for parent, dirnames, filenames in source_dirs:
+        print(parent, dirnames)
+        for filename in filenames:
+            if'.npy'not in filename:
+                continue
+            pathfile = os.path.join(parent, filename)
+            arcname = pathfile[pre_len:].strip(os.path.sep)   #????
+            zipf.write(pathfile, arcname)
+    zipf.close()

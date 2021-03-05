@@ -295,4 +295,5 @@ data/*
 .vscode/*
 .VSCodeCounter/
 .VSCodeCounter/*
-out/*
+result/*
+result.zip
