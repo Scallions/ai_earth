@@ -15,8 +15,8 @@ if __name__ == "__main__":
     model_path = ""
     out_path = "result/"
     tool.set_seed()
-    train_loader, test_loader = data.read_data(in_range=False,mean=False)
+    train_loader = data.read_data(in_range=False,mean=False, val=False, start_random=True)
     model = models.build_model()
-    train.train(model, train_loader, test_loader)
+    train.train(model, train_loader)
     tool.predict(model, test_data_path, out_path) 
     tool.make_zip()

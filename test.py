@@ -40,7 +40,8 @@ def test_model():
 def test_train():
     model_ = models.build_model()
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    dataloader, train_loader = data.read_data(mean=False,in_range=False)
+    dataloader = data.read_data(mean=False,in_range=False,val=False, start_random=True)
+    train_loader = data.read_data(mean=False,in_range=False,dataset="SODA",val=False)
     datas, label = data.read_test_data(mean=False,in_range=False)
     datas = datas.to(device)
     label = label.detach().numpy()

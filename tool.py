@@ -10,7 +10,7 @@ import zipfile
 import random 
 import torch
 
-def set_seed(seed = 427):
+def set_seed(seed = 1):
     random.seed(seed)
     np.random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
@@ -39,6 +39,7 @@ def predict(model=None, test_data_dir=None, out_path=None):
     """
     predict and save result
     """
+    model.eval()
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     for file in glob.iglob(os.path.join(test_data_dir, r"*.npy")):
         print(file)
@@ -50,11 +51,11 @@ def score(y, y_hat):
     """calc score
     y: n x 24 np.array
     """
-    a = np.zeros((1,24))
-    a[0, :4] = 1.5
-    a[0, 4:11] = 2
-    a[0, 11:18] = 3
-    a[0, 18:] = 4
+    a = np.zeros((24))
+    a[:4] = 1.5
+    a[4:11] = 2
+    a[11:18] = 3
+    a[18:] = 4
     i = np.arange(1,25,1)
     accskill = (a * np.log(i) * cor(y, y_hat)).sum()
     return 2.0/3 * accskill - rmse(y, y_hat)
@@ -64,7 +65,7 @@ def rmse(y, y_hat):
     """
     d_y = y - y_hat
     n = y.shape[0]
-    return (np.sqrt((d_y**2).sum(0)) / n).sum()
+    return np.sqrt((d_y**2).sum(0) / n).sum()
 
 def cor(y, y_hat):
     """calc cor index

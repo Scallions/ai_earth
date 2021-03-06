@@ -9,7 +9,7 @@ import tool
 
 
 
-def train(net, train_loader, test_loader):
+def train(net, train_loader, test_loader=None, epoch=20):
     """
     train func
     """
@@ -18,8 +18,9 @@ def train(net, train_loader, test_loader):
     net.to(device)
     opt = torch.optim.Adam(net.parameters(), lr=8e-5)
     l = torch.nn.MSELoss() 
+    # l = torch.nn.L1Loss()
     l.to(device)
-    for epoch in range(20):
+    for epoch in range(epoch):
         net.train()
         for i, (x, y) in enumerate(train_loader):
             y = y.float().to(device)
@@ -35,7 +36,11 @@ def train(net, train_loader, test_loader):
         if epoch % 5 == 0:
             score1 = tool.score(y.cpu().detach().numpy(), output.cpu().detach().numpy())
             net.eval()
+            if test_loader is None:
+                print(f"{epoch}:{i}, loss: {loss.item()}, score_train: {score1}")
+                continue
             for x, y in test_loader:
+                # gui yi hua 
                 y = y.float().to(device)
                 x = x.float().to(device)
                 y_hat = net(x)

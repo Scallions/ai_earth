@@ -7,11 +7,44 @@ Define network
 """
 class Net(torch.nn.Module):
     def __init__(self):
-        pass
+        super().__init__()
+        model = torch.nn.Sequential()
+        model.add_module('flatten', torch.nn.Flatten())
+        model.add_module('l1',torch.nn.Linear(24*48, 120))
+        # model.add_module('bn1', torch.nn.BatchNorm1d(120))
+        model.add_module('ac1',torch.nn.ReLU())
+        model.add_module('dp1', torch.nn.Dropout(0.25))
+        model.add_module('l2',torch.nn.Linear(120, 48))
+        # model.add_module('bn2', torch.nn.BatchNorm1d(48))
+        model.add_module('ac2',torch.nn.ReLU())
+        model.add_module('dp2', torch.nn.Dropout(0.25))
+        model.add_module('l3',torch.nn.Linear(48, 48))
+        # model.add_module('bn3', torch.nn.BatchNorm1d(24))
+        model.add_module('ac3',torch.nn.ReLU())
+        model.add_module('dp3', torch.nn.Dropout(0.25))
+        model.add_module('l4',torch.nn.Linear(48, 48))
+        # model.add_module('bn4', torch.nn.BatchNorm1d(24))
+        model.add_module('ac4',torch.nn.ReLU())
+        model.add_module('dp4', torch.nn.Dropout(0.25))
+        model.add_module('l5', torch.nn.Linear(48,24))
+        # model.add_module('bn4', torch.nn.BatchNorm1d(24))
+        # model.add_module('ac5', torch.nn.Tanh())
+
+        self.model = model
+        self.avgpool = nn.AdaptiveAvgPool2d((4,6))
+        self.bn = nn.BatchNorm2d(48)
+        self.bn1d = nn.BatchNorm1d(12)
+        self.flatten = nn.Flatten()
 
     def forward(self,x):
         # x: (b:32,t:12,c:2,h:3,w:11)
-        pass 
+        b = x.shape[0]
+        x = x.reshape(-1,48,24,72)
+        x = self.avgpool(x)
+        x = self.bn(x)
+        x = x.reshape(b,12,-1)
+        x = self.bn1d(x)
+        return self.model(x)
 
 class simpleSpatailTimeNN(nn.Module):
     def __init__(self, n_cnn_layer:int=1, kernals:list=[3], n_lstm_units:int=64):
@@ -50,22 +83,8 @@ class simpleSpatailTimeNN(nn.Module):
         x = self.linear(x)
         return x
 
+
+
 def build_model():
     return simpleSpatailTimeNN()
-    # model = torch.nn.Sequential()
-    # model.add_module('flatten', torch.nn.Flatten())
-    # model.add_module('l1',torch.nn.Linear(48, 24))
-    # # model.add_module('bn1', torch.nn.BatchNorm1d())
-    # model.add_module('ac1',torch.nn.ReLU())
-    # model.add_module('dp1', torch.nn.Dropout(0.25))
-    # model.add_module('l2',torch.nn.Linear(24, 12))
-    # model.add_module('ac2',torch.nn.ReLU())
-    # model.add_module('dp2', torch.nn.Dropout(0.25))
-    # model.add_module('l3',torch.nn.Linear(12, 12))
-    # model.add_module('ac3',torch.nn.ReLU())
-    # model.add_module('dp3', torch.nn.Dropout(0.25))
-    # model.add_module('l4',torch.nn.Linear(12, 24))
-    # model.add_module('ac4',torch.nn.ReLU())
-    # model.add_module('dp4', torch.nn.Dropout(0.25))
-    # model.add_module('l5', torch.nn.Linear(24,24))
-    # return model
+    # return Net()
