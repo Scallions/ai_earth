@@ -4,7 +4,7 @@ import models
 import train
 
 import numpy as np
-
+import torch
 
 
 
@@ -17,6 +17,11 @@ def test_score():
 def test_read_data():
     dataloader, train_loader = data.read_data()
     for i, (y, x) in enumerate(dataloader):
+        print(y.shape, x.shape)
+        break
+
+    dataloader, train_loader = data.read_data(mean=False)
+    for y, x in dataloader:
         print(y.shape, x.shape)
         break
 
@@ -34,24 +39,33 @@ def test_model():
 
 def test_train():
     model_ = models.build_model()
-    dataloader, train_loader = data.read_data()
-    datas, label = data.read_test_data()
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    dataloader, train_loader = data.read_data(mean=False,in_range=False)
+    datas, label = data.read_test_data(mean=False,in_range=False)
+    datas = datas.to(device)
     label = label.detach().numpy()
-    y = model_(datas).detach().numpy()
+    model_.to(device)
+    model_.eval()
+    y = model_(datas).cpu().detach().numpy()
     print(tool.score(label, y))
+    model_.train()
     train.train(model_, dataloader, train_loader)
-    y = model_(datas).detach().numpy()
+    model_.eval()
+    y = model_(datas).cpu().detach().numpy()
     print(tool.score(label, y))
+    print(np.abs(y-label))
     # print(y.shape, label.shape)
 
 if __name__ == "__main__":
+    tool.set_seed()
+
     ## test tool
     test_score()
 
 
     ## test data
-    test_read_data()
-    test_read_test_data()
+    # test_read_data()
+    # test_read_test_data()
 
     ## test model
     # test_model()

@@ -7,6 +7,14 @@ import numpy as np
 import glob
 import os
 import zipfile
+import random 
+import torch
+
+def set_seed(seed = 427):
+    random.seed(seed)
+    np.random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    torch.manual_seed(seed)
 
 def save_model():
     """
@@ -31,10 +39,11 @@ def predict(model=None, test_data_dir=None, out_path=None):
     """
     predict and save result
     """
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     for file in glob.iglob(os.path.join(test_data_dir, r"*.npy")):
         print(file)
-        dataset = data.read_test_data_nolabel(file)
-        y = model(dataset).reshape(24).detach().numpy()
+        dataset = data.read_test_data_nolabel(file, in_range=False, mean=False).to(device)
+        y = model(dataset).reshape(24).cpu().detach().numpy()
         np.save(out_path+file.split("/")[-1], y)
 
 def score(y, y_hat):
