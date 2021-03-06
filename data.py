@@ -36,15 +36,21 @@ class MyDataset(torch.utils.data.Dataset):
         self.data = data
         self.label = label
         self.star_random = start_random
+        self.time = np.array([i%12/12 for i in range(data.shape[0])])
+        self.time = np.expand_dims(self.time, -1)
         
     def __len__(self):
         if self.star_random:
+            if MODEL == "informer":
+                return self.data.shape[0] - 38
             return self.data.shape[0]-12
         else:
             return self.data.shape[0]
         
     def __getitem__(self, index):
         if self.star_random:
+            if MODEL == "informer":
+                return self.data[index:index+38], self.time[index:index+38]
             return self.data[index:index+12], self.label[index:index+24]
         else:
             return self.data[index], self.label[index]
@@ -56,11 +62,11 @@ def dataloader_from(data, label, start_random=True, val = True):
     else:
         train_len = int(data.shape[0])
     if start_random:
-        train_dataset = MyDataset(data[:train_len,:,:], label[:train_len+24])
-        test_dataset = MyDataset(data[train_len:,:,:], label[train_len:])
+        train_dataset = MyDataset(data[:train_len], label[:train_len+24])
+        test_dataset = MyDataset(data[train_len:], label[train_len:])
     else:
-        train_dataset = MyDataset(data[:train_len,:,:], label[:train_len], start_random)
-        test_dataset = MyDataset(data[train_len:,:,:], label[train_len:], start_random)
+        train_dataset = MyDataset(data[:train_len], label[:train_len], start_random)
+        test_dataset = MyDataset(data[train_len:], label[train_len:], start_random)
 
     train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                 batch_size = 64, shuffle=True)

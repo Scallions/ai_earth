@@ -1,7 +1,9 @@
+from torch.nn.modules.module import T
 import tool  
 import data
 import models 
 import train
+import informer
 
 import numpy as np
 import torch
@@ -37,6 +39,11 @@ def test_model():
     # print(y.shape, label.shape)
     print(tool.score(label, y))
 
+def test_informer():
+    model = informer.build_model().double()
+    dataloader = data.read_data(in_range=True,mean=True, val=False, start_random=True)
+    train.train(model, dataloader)
+
 def test_train():
     model_ = models.build_model()
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -61,7 +68,7 @@ if __name__ == "__main__":
     tool.set_seed()
 
     ## test tool
-    test_score()
+    # test_score()
 
 
     ## test data
@@ -71,4 +78,5 @@ if __name__ == "__main__":
     ## test model
     # test_model()
 
-    test_train()
+    # test_train()
+    test_informer()
