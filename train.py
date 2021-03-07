@@ -43,6 +43,35 @@ def train(net, train_loader, test_loader=None, epoch=20):
                 opt.step()
                 if i % 5 == 0:
                     print(f"{epoch}:{i} : {loss.item()}")
+            if epoch % 2 == 0:
+                y = x.cpu().detach().numpy()
+                y = y[:,12:12+24,0]
+                o = output[0].cpu().detach().numpy()
+                o = o[:,:24,0]
+                score1 = tool.score(y, o)
+                net.eval()
+                if test_loader is None:
+                    print(f"{epoch}:{i}, loss: {loss.item()}, score_train: {score1}")
+                    continue
+                for i, (x, t) in enumerate(train_loader):
+                    x_n = x[:,:12] # (b, 12, 4)
+                    t_n = t[:,:12] # (b, 12, 1)
+                    t_p = t # (b, 38, 1)
+                    x_p = x.clone() # (b, 38, 4)
+                    x_p[:,12:] = 0
+                    x = x.to(device)
+                    x_n = x_n.to(device)
+                    t_n = t_n.to(device)
+                    x_p = x_p.to(device)
+                    t_p = t_p.to(device)
+                    opt.zero_grad()
+                    output = net(x_n,t_n, x_p, t_p)
+                    y = x.cpu().detach().numpy()
+                    y = y[:,12:12+24,0]
+                    o = output[0].cpu().detach().numpy()
+                    o = o[:,:24,0]
+                    score = tool.score(y, o)
+                print(f"{epoch}:{i}, loss: {loss.item()}, score_test: {score}, score_train: {score1}")
 
         else:
             for i, (x, y) in enumerate(train_loader):
@@ -69,8 +98,11 @@ def train(net, train_loader, test_loader=None, epoch=20):
                     y_hat = net(x)
                     score = tool.score(y.cpu().detach().numpy(), y_hat.cpu().detach().numpy())
                 print(f"{epoch}:{i}, loss: {loss.item()}, score_test: {score}, score_train: {score1}")
-            
-
+        if epoch % 10 == 9: 
+            net.eval()  
+            print("save net")
+            torch.save(net.state_dict(),f"checkpoints/mode.pt")
+            torch.save(net.state_dict(),f"checkpoints/mode-oldversion.pt", _use_new_zipfile_serialization=False)
 
 if __name__ == "__main__":
     model = models.build_model()

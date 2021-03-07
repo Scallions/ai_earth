@@ -36,7 +36,8 @@ class MyDataset(torch.utils.data.Dataset):
         self.data = data
         self.label = label
         self.star_random = start_random
-        self.time = np.array([i%12/12 for i in range(data.shape[0])])
+        # self.time = np.array([i%12 for i in range(data.shape[0])],dtype=np.float) # fixed
+        self.time = np.array([i%12/12.0 - 0.5 for i in range(data.shape[0])],dtype=np.float) # timeF
         self.time = np.expand_dims(self.time, -1)
         
     def __len__(self):
@@ -137,6 +138,7 @@ def read_test_data(only_sst=False, in_range=True, mean=True):
 
 def read_test_data_nolabel(path,only_sst=False, in_range=True, mean=True):
     data = torch.from_numpy(np.load(path)).float()
+    data = data.permute(0,3,1,2)
     if only_sst:
         data = data[:,0,:,:]
     if in_range:

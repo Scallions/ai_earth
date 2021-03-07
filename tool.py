@@ -2,6 +2,7 @@
 some tool funcs
 """
 import data
+from constants import *
 
 import numpy as np
 import glob
@@ -43,8 +44,23 @@ def predict(model=None, test_data_dir=None, out_path=None):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     for file in glob.iglob(os.path.join(test_data_dir, r"*.npy")):
         print(file)
-        dataset = data.read_test_data_nolabel(file, in_range=False, mean=False).to(device)
-        y = model(dataset).reshape(24).cpu().detach().numpy()
+        if MODEL == "informer":
+            model.to(device).double()
+            s = file.split('_')[-2]
+            s = int(s)
+            t = np.array([i%12/12.0 - 0.5 for i in range(s,s+38)],dtype=np.float)
+            t = np.expand_dims(t,1)
+            t = torch.from_numpy(t).double()
+            t_n = t[:12].to(device).unsqueeze(0)
+            t_p = t[:].to(device).unsqueeze(0)
+            x_n = data.read_test_data_nolabel(file, in_range=True, mean=True).double().to(device)
+            x_p = torch.zeros(1,26,4).to(device).double()
+            x_p = torch.cat([x_n, x_p], dim=1).double().to(device)
+            y = model(x_n,t_n,x_p,t_p)[0].reshape(26).cpu().detach().numpy()
+            y = np.convolve(y, np.ones((3,))/3, mode="valid")
+        else:
+            dataset = data.read_test_data_nolabel(file, in_range=False, mean=False).to(device)
+            y = model(dataset).reshape(24).cpu().detach().numpy()
         np.save(out_path+file.split("/")[-1], y)
 
 def score(y, y_hat):
@@ -115,3 +131,33 @@ def make_zip(source_dir='./result/', output_filename = 'result.zip'):
             arcname = pathfile[pre_len:].strip(os.path.sep)   #????
             zipf.write(pathfile, arcname)
     zipf.close()
+
+
+def model_convert(model):
+    model.eval()
+    torch.save(model.state_dict(),"checkpoints/mode-oldversion.pt", _use_new_zipfile_serialization=False)
+
+
+def coreff(x, y):
+    x_mean = np.mean(x)
+    y_mean = np.mean(y)
+    c1 = sum((x - x_mean) * (y - y_mean))
+    c2 = sum((x - x_mean)**2) * sum((y - y_mean)**2)
+    return c1/np.sqrt(c2)
+def rmse_(preds, y):
+    return np.sqrt(sum((preds - y)**2)/preds.shape[0])
+def evaluate_metrics(preds, label):
+    # preds = preds.cpu().detach().numpy().squeeze()
+    # label = label.cpu().detach().numpy().squeeze()
+    preds = preds.squeeze()
+    label = label.squeeze()
+    acskill = 0
+    RMSE = 0
+    a = 0
+    a = [1.5]*4 + [2]*7 + [3]*7 + [4]*6
+    for i in range(24):
+        RMSE += rmse_(label[:, i], preds[:, i])
+        cor = coreff(label[:, i], preds[:, i])
+    
+        acskill += a[i] * np.log(i+1) * cor
+    return 2/3 * acskill - RMSE

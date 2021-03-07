@@ -11,7 +11,7 @@ def build_model():
         12, #args.seq_len, 
         12, #args.label_len,
         26, #args.pred_len, 
-        2, #args.factor,
+        1, #args.factor,
         512, #args.d_model, 
         8, #args.n_heads, 
         3, #args.e_layers,
@@ -19,7 +19,7 @@ def build_model():
         512, #args.d_ff,
         0.05, #args.dropout, 
         'prob', #args.attn,
-        'timeF', #args.embed,
+        'timeF', #args.embed, timeF : month of year fixed: 1-12
         'm', #args.freq,
         'gelu', #args.activation,
         True, #args.output_attention,

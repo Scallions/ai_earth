@@ -14,7 +14,10 @@ def test_score():
     y = np.random.rand(50, 24)
     y_hat = np.random.rand(50, 24)
     score = tool.score(y, y_hat)
-    print(score)
+    # y = torch.from_numpy(y)
+    # y_hat = torch.from_numpy(y_hat)
+    score1 = tool.evaluate_metrics(y,y_hat)
+    print(score, score1)
 
 def test_read_data():
     dataloader, train_loader = data.read_data()
@@ -41,8 +44,9 @@ def test_model():
 
 def test_informer():
     model = informer.build_model().double()
-    dataloader = data.read_data(in_range=True,mean=True, val=False, start_random=True)
-    train.train(model, dataloader)
+    dataloader = data.read_data(in_range=True,mean=True, val=False, start_random=True,dataset="CMIP")
+    testloader = data.read_data(in_range=True,mean=True, val=False, start_random=True,dataset="SODA")
+    train.train(model, dataloader, testloader)
 
 def test_train():
     model_ = models.build_model()

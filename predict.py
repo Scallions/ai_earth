@@ -4,8 +4,10 @@ predict
 import tool
 import data
 import models 
+import informer
 import train
 
+import torch
 
 if __name__ == "__main__":
     # data_path = "/data/enso_round1_train_20210201"
@@ -15,8 +17,10 @@ if __name__ == "__main__":
     model_path = ""
     out_path = "result/"
     tool.set_seed()
-    train_loader = data.read_data(in_range=False,mean=False, val=False, start_random=True)
-    model = models.build_model()
-    train.train(model, train_loader)
+    # train_loader = data.read_data(in_range=False,mean=False, val=False, start_random=True)
+    model = informer.build_model()
+    model.load_state_dict(torch.load("checkpoints/mode-oldversion.pt"))
+    # tool.model_convert(model)
+    # train.train(model, train_loader)
     tool.predict(model, test_data_path, out_path) 
     tool.make_zip()

@@ -299,3 +299,5 @@ tcdata/*
 result/*
 result.zip
 fig/*
+
+checkpoints/*
