@@ -46,14 +46,15 @@ class Net(torch.nn.Module):
         x = self.bn1d(x)
         return self.model(x)
 
+
 class simpleSpatailTimeNN(nn.Module):
     def __init__(self, n_cnn_layer:int=1, kernals:list=[3], n_lstm_units:int=64):
-        super().__init__()
+        super(simpleSpatailTimeNN, self).__init__()
         self.conv1 = nn.ModuleList([nn.Conv2d(in_channels=12, out_channels=12, kernel_size=i) for i in kernals])
         self.conv2 = nn.ModuleList([nn.Conv2d(in_channels=12, out_channels=12, kernel_size=i) for i in kernals])
         self.conv3 = nn.ModuleList([nn.Conv2d(in_channels=12, out_channels=12, kernel_size=i) for i in kernals])
         self.conv4 = nn.ModuleList([nn.Conv2d(in_channels=12, out_channels=12, kernel_size=i) for i in kernals])
-        self.max_pool = nn.AdaptiveAvgPool2d((22, 1))
+        self.max_pool = nn.AdaptiveMaxPool2d((22, 1))
         self.avg_pool = nn.AdaptiveAvgPool2d((1, 128))
         self.batch_norm = nn.BatchNorm1d(12, affine=False)
         self.lstm = nn.LSTM(88, n_lstm_units, 2, bidirectional=True)
@@ -82,8 +83,6 @@ class simpleSpatailTimeNN(nn.Module):
         x = self.avg_pool(x).squeeze(dim=-2)
         x = self.linear(x)
         return x
-
-
 
 def build_model():
     return simpleSpatailTimeNN()

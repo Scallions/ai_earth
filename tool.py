@@ -40,12 +40,14 @@ def predict(model=None, test_data_dir=None, out_path=None):
     """
     predict and save result
     """
+    # device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = DEVICE
     model.eval()
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    model.to(device)
     for file in glob.iglob(os.path.join(test_data_dir, r"*.npy")):
         print(file)
         if MODEL == "informer":
-            model.to(device).double()
+            model.double()
             s = file.split('_')[-2]
             s = int(s)
             t = np.array([i%12/12.0 - 0.5 for i in range(s,s+38)],dtype=np.float)

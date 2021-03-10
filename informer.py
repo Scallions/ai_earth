@@ -1,9 +1,11 @@
 from Informer2020.models.model import Informer
 import torch
+from constants import *
 
 
 def build_model():
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    # device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = DEVICE
     model = Informer(
         4, # args.enc_in,
         4, #args.dec_in, 

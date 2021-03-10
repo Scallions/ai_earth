@@ -300,3 +300,6 @@ tcdata/*
 
 fig/
 fig/*
+
+model_archive/
+model_archive/*

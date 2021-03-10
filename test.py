@@ -4,6 +4,7 @@ import data
 import models 
 import train
 import informer
+from constants import *
 
 import numpy as np
 import torch
@@ -50,7 +51,8 @@ def test_informer():
 
 def test_train():
     model_ = models.build_model()
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    # device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = DEVICE
     dataloader = data.read_data(mean=False,in_range=False,val=False, start_random=True)
     train_loader = data.read_data(mean=False,in_range=False,dataset="SODA",val=False)
     datas, label = data.read_test_data(mean=False,in_range=False)

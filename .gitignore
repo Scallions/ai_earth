@@ -301,3 +301,4 @@ result.zip
 fig/*
 
 checkpoints/*
+model_archive/

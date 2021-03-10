@@ -4,6 +4,7 @@ import os
 import random
 
 import models
+import informer
 import data
 import tool
 from constants import *
@@ -15,10 +16,13 @@ def train(net, train_loader, test_loader=None, epoch=20):
     train func
     """
     tool.set_seed()
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    # device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = DEVICE
     net.to(device)
     opt = torch.optim.Adam(net.parameters(), lr=8e-5)
     l = torch.nn.MSELoss() 
+    if MODEL == "informer":
+        model.double()
     # l = torch.nn.L1Loss()
     l.to(device)
     for epoch in range(epoch):
@@ -101,11 +105,16 @@ def train(net, train_loader, test_loader=None, epoch=20):
         if epoch % 10 == 9: 
             net.eval()  
             print("save net")
-            torch.save(net.state_dict(),f"checkpoints/mode.pt")
-            torch.save(net.state_dict(),f"checkpoints/mode-oldversion.pt", _use_new_zipfile_serialization=False)
+            torch.save(net.state_dict(),f"checkpoints/mode-{MODEL}.pt")
+            torch.save(net.state_dict(),f"checkpoints/mode-{MODEL}-oldversion.pt", _use_new_zipfile_serialization=False)
 
 if __name__ == "__main__":
-    model = models.build_model()
-    data_loader, test_loader = data.read_data(mean=False, in_range=False)
-    train(model, data_loader, test_loader)
+    tool.set_seed(4)
+    # model = models.build_model()
+    model = informer.build_model()
+    # data_loader, test_loader = data.read_data(mean=False, in_range=False)
+    data_loader = data.read_data(start_random=True,val=False)
+    val_loader = data.read_data(start_random=True,dataset="SODA", val=False)
+    train(model, data_loader, val_loader, epoch=60)
+    train(model, val_loader,epoch=10)
 

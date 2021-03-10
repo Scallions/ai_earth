@@ -6,6 +6,7 @@ import data
 import models 
 import informer
 import train
+from constants import *
 
 import torch
 
@@ -19,7 +20,8 @@ if __name__ == "__main__":
     tool.set_seed()
     # train_loader = data.read_data(in_range=False,mean=False, val=False, start_random=True)
     model = informer.build_model()
-    model.load_state_dict(torch.load("checkpoints/mode-oldversion.pt"))
+    # model = models.build_model()
+    model.load_state_dict(torch.load(f"checkpoints/mode-{MODEL}-oldversion.pt"))
     # tool.model_convert(model)
     # train.train(model, train_loader)
     tool.predict(model, test_data_path, out_path) 

@@ -26,5 +26,9 @@ test:
 		...
 """
 
+import torch 
+
 
 MODEL = "informer"
+# MODEL = "none"
+DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'

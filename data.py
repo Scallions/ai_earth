@@ -57,7 +57,7 @@ class MyDataset(torch.utils.data.Dataset):
             return self.data[index], self.label[index]
 
 
-def dataloader_from(data, label, start_random=True, val = True):
+def dataloader_from(data, label, start_random=True, val = True, shuffle = True):
     if val:
         train_len = int(0.8*data.shape[0])
     else:
@@ -70,7 +70,7 @@ def dataloader_from(data, label, start_random=True, val = True):
         test_dataset = MyDataset(data[train_len:], label[train_len:], start_random)
 
     train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
-                batch_size = 64, shuffle=True)
+                batch_size = 64, shuffle=shuffle)
     if val:
         test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
                 batch_size=len(test_dataset))
@@ -79,7 +79,7 @@ def dataloader_from(data, label, start_random=True, val = True):
     else:
         return train_loader
 
-def read_data(only_sst=False, in_range=True, start_random=False, mean=True, dataset="CMIP", val = True):
+def read_data(only_sst=False, in_range=True, start_random=False, mean=True, dataset="CMIP", val = True, shuffle=True):
     """
     read train data nc => torch.array
     """
@@ -117,7 +117,7 @@ def read_data(only_sst=False, in_range=True, start_random=False, mean=True, data
         features = features.mean(-1).mean(-1)
     
 
-    return dataloader_from(features, label, start_random, val)
+    return dataloader_from(features, label, start_random, val, shuffle)
 
 
 
