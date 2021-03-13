@@ -302,3 +302,5 @@ fig/*
 
 checkpoints/*
 model_archive/
+
+log/

@@ -11,20 +11,31 @@ from constants import *
 
 
 
-def train(net, train_loader, test_loader=None, epoch=20):
+def train(net, train_loader, test_loader=None, epoch=20, loss_fun="MSE", lr=8e-5):
     """
     train func
     """
     tool.set_seed()
     # device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    ### print start info
+    print(f"""
+    Staring train
+        MODEL: {MODEL},
+        LOSS:  {loss_fun},
+        EPOCH:  {epoch},
+        LR:  {lr}
+    """)
     device = DEVICE
     net.to(device)
-    opt = torch.optim.Adam(net.parameters(), lr=8e-5)
-    l = torch.nn.MSELoss() 
+    opt = torch.optim.Adam(net.parameters(), lr=lr)
+    if loss_fun == "MSE":
+        l = torch.nn.MSELoss() 
+    else:
+        l = torch.nn.L1Loss()
     if MODEL == "informer":
         model.double()
-    # l = torch.nn.L1Loss()
     l.to(device)
+    log = ""
     for epoch in range(epoch):
         net.train()
         if MODEL == "informer":
@@ -47,6 +58,7 @@ def train(net, train_loader, test_loader=None, epoch=20):
                 opt.step()
                 if i % 5 == 0:
                     print(f"{epoch}:{i} : {loss.item()}")
+                    log += f"\n{epoch}:{i} : {loss.item()}"
             if epoch % 2 == 0:
                 y = x.cpu().detach().numpy()
                 y = y[:,12:12+24,0]
@@ -56,6 +68,7 @@ def train(net, train_loader, test_loader=None, epoch=20):
                 net.eval()
                 if test_loader is None:
                     print(f"{epoch}:{i}, loss: {loss.item()}, score_train: {score1}")
+                    log += f"\n{epoch}:{i}, loss: {loss.item()}, score_train: {score1}"
                     continue
                 for i, (x, t) in enumerate(train_loader):
                     x_n = x[:,:12] # (b, 12, 4)
@@ -76,7 +89,7 @@ def train(net, train_loader, test_loader=None, epoch=20):
                     o = o[:,:24,0]
                     score = tool.score(y, o)
                 print(f"{epoch}:{i}, loss: {loss.item()}, score_test: {score}, score_train: {score1}")
-
+                log += f"\n{epoch}:{i}, loss: {loss.item()}, score_test: {score}, score_train: {score1}"
         else:
             for i, (x, y) in enumerate(train_loader):
                 y = y.float().to(device)
@@ -94,6 +107,7 @@ def train(net, train_loader, test_loader=None, epoch=20):
                 net.eval()
                 if test_loader is None:
                     print(f"{epoch}:{i}, loss: {loss.item()}, score_train: {score1}")
+                    log += f"\n{epoch}:{i}, loss: {loss.item()}, score_train: {score1}"
                     continue
                 for x, y in test_loader:
                     # gui yi hua 
@@ -102,19 +116,24 @@ def train(net, train_loader, test_loader=None, epoch=20):
                     y_hat = net(x)
                     score = tool.score(y.cpu().detach().numpy(), y_hat.cpu().detach().numpy())
                 print(f"{epoch}:{i}, loss: {loss.item()}, score_test: {score}, score_train: {score1}")
+                log += f"\n{epoch}:{i}, loss: {loss.item()}, score_test: {score}, score_train: {score1}"
         if epoch % 10 == 9: 
             net.eval()  
             print("save net")
+            log += "save net"
             torch.save(net.state_dict(),f"checkpoints/mode-{MODEL}.pt")
             torch.save(net.state_dict(),f"checkpoints/mode-{MODEL}-oldversion.pt", _use_new_zipfile_serialization=False)
+    with open("log/train.txt","w") as f:
+        f.write(log)
 
 if __name__ == "__main__":
     tool.set_seed(4)
     # model = models.build_model()
     model = informer.build_model()
+    model.load_state_dict(torch.load(f"checkpoints/mode-{MODEL}-oldversion.pt"))
     # data_loader, test_loader = data.read_data(mean=False, in_range=False)
     data_loader = data.read_data(start_random=True,val=False)
     val_loader = data.read_data(start_random=True,dataset="SODA", val=False)
-    train(model, data_loader, val_loader, epoch=60)
-    train(model, val_loader,epoch=10)
+    train(model, data_loader, val_loader, epoch=40)
+    train(model, val_loader, epoch=10, loss_fun="L1", lr=1e-6)
 
